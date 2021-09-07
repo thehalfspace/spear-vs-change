@@ -19,8 +19,8 @@ function healing2(t,tStart,dam)
                         (0.5 => 15 years to heal completely)
                         (0.8 => 8 years to heal completely)
     """
-    hmax = 0.05
-    r =  0.7   # 1/1.5
+    hmax = 0.01
+    r =  1  # 1/1.5
 
     hmax*(1 .- exp.(-r*(t .- tStart)/P[1].yr2sec)) .+ dam
 end
@@ -265,6 +265,29 @@ function main(P)
             d[P[4].FltIglobBC] .= 0.
             v[P[4].FltIglobBC] .= 0.
 
+            #---------------
+            # Healing stuff:
+            # --------------
+            #  if alphaa < 1.00 && it > 100
+                #  #  print("\n\nAlpha reduction here\n\n")
+
+                #  alphaa = healing2(t, tStart2, dam)
+                #  # alphaa = 1.00
+                #  for id in did
+                    #  Ksparse[id] = alphaa*Korig[id]
+                #  end
+
+                #  # Linear solver stuff
+                #  kni = -Ksparse[P[4].FltNI, P[4].FltNI]
+                #  nKsparse = -Ksparse
+                #  # multigrid
+                #  ml = ruge_stuben(kni)
+                #  p = aspreconditioner(ml)
+
+            #  elseif alphaa > 1.00
+                    #  alphaa = 1.00
+            #  end
+
                  
         # If isolver != 1, or max slip rate is < 10^-2 m/s
         else
@@ -341,11 +364,14 @@ function main(P)
             # --------------
             print("\n\nAlpha reduction here\n\n")
 
-            # alphaa = 0.99
-            alphaa = 1.00
+            alphaa = 0.99
+            # alphaa = 1.00
             for id in did
                 Ksparse[id] = alphaa*Korig[id]
             end
+
+            tStart2 = t
+            dam = alphaa
 
             # Linear solver stuff
             kni = -Ksparse[P[4].FltNI, P[4].FltNI]
@@ -373,20 +399,21 @@ function main(P)
             #---------------
             # Alpha back to normal
             # --------------
-            #print("\n\nAlpha back to normal here\n\n")
+            #  print("\n\nAlpha back to normal here\n\n")
 
-            #for id in did
-            #    Ksparse[id] = Korig[id]
-            #end
+            #  for id in did
+                #  Ksparse[id] = Korig[id]
+            #  end
 
-            # Linear solver stuff
-            #kni = -Ksparse[P[4].FltNI, P[4].FltNI]
-            #nKsparse = -Ksparse
-            # multigrid
-            #ml = ruge_stuben(kni)
-            #p = aspreconditioner(ml)
+            #  # Linear solver stuff
+            #  kni = -Ksparse[P[4].FltNI, P[4].FltNI]
+            #  nKsparse = -Ksparse
+            #  # multigrid
+            #  ml = ruge_stuben(kni)
+            #  p = aspreconditioner(ml)
         end
         
+
 
         #-----
         # Output the variables certain timesteps: 2yr interseismic, 1 sec dynamic
