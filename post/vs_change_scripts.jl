@@ -43,20 +43,20 @@ function Vfmax_comp(Vfmax1, Vfmax2, t1, t2, tS1, tS2, tE1, tE2)
 
 	# ref is the translation factor to bring both plots to
 	# the same zero (in seconds)
-	ref = 14
+	ref = 4.5
 
     fig = PyPlot.figure(figsize=(7.2, 4.45))
     ax = fig.add_subplot(111)
     ax.plot(t1[idS1:idE1] .- t1[idS1] .- ref, Vfmax1[idS1:idE1], lw = 2.0, color="tab:blue", 
-            label="Without velocity drop")
+            label="1 km DFZ, 0% vs contrast")
     ax.plot(t2[idS2:idE2] .- t2[idS2], Vfmax2[idS2:idE2], lw = 2.0, color="tab:orange", alpha = 0.6,
-            label="With velocity drop") 
+            label="1 km DFZ, 30% vs contrast") 
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("Max. slip rate (m/s)")
     plt.legend()
     show()
     
-    figname = string(path, "Vfmax_Comp_01.png");
+    figname = string(path, "VfComp_01.png");
     fig.savefig(figname, dpi = 300);
 
 end
@@ -69,9 +69,9 @@ function Vfmax_comp_full(Vfmax1, Vfmax2, t1, t2)
     fig = PyPlot.figure(figsize=(7.2, 4.45))
     ax = fig.add_subplot(111)
     ax.plot(t1, Vfmax1, lw = 2.0, color="tab:blue", 
-            label="Without velocity drop")
+            label="1 km DFZ, 0% Vs contrast, 1% red.")
    ax.plot(t2, Vfmax2, lw = 2.0, color="tab:orange",
-            label="With velocity drop") 
+            label="1 km DFZ, 30% Vs contrast, 1% red.") 
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("Max. slip rate (m/s)")
 	ax.set_yscale("log")
