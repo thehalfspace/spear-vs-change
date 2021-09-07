@@ -120,7 +120,7 @@ function main(P)
 
     v = v[:] .- 0.5*P[2].Vpl
     Vf = 2*v[P[4].iFlt]
-    iFBC::Vector{Int64} = findall(abs.(P[3].FltX) .> 24e3)
+    iFBC::Vector{Int64} = findall(abs.(P[3].FltX) .> 22.5)
     NFBC::Int64 = length(iFBC) + 1
     Vf[iFBC] .= 0.
 
@@ -161,7 +161,7 @@ function main(P)
     open(string(out_dir,"params.out"), "w") do io
         write(io, join(P[3].Seff/1e6, " "), "\n")
         write(io, join(P[3].tauo/1e6, " "), "\n")
-        write(io, join(-P[3].FltX/1e3, " "), "\n")
+        write(io, join(-P[3].FltX/1e0, " "), "\n")
         write(io, join(P[3].cca, " "), "\n")
         write(io, join(P[3].ccb, " "), "\n")
         write(io, join(P[3].xLf, " "), "\n")

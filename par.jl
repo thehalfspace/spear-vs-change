@@ -15,11 +15,11 @@ include("$(@__DIR__)/src/damageEvol.jl")   #    Stiffness index of damaged mediu
 
 function setParameters(FZdepth, res)
 
-    LX::Int = 48e3  # depth dimension of rectangular domain
-    LY::Int = 30e3 # off fault dimenstion of rectangular domain
+    LX::Int = 45  # depth dimension of rectangular domain
+    LY::Int = 30 # off fault dimenstion of rectangular domain
 
-    NelX::Int = 30*res # no. of elements in x
-    NelY::Int = 20*res # no. of elements in y
+    NelX::Int = 15*res # no. of elements in x
+    NelY::Int = 10*res # no. of elements in y
 
     dxe::Float64 = LX/NelX #	Size of one element along X
     dye::Float64 = LY/NelY #	Size of one element along Y
@@ -42,7 +42,7 @@ function setParameters(FZdepth, res)
 
     yr2sec::Int = 365*24*60*60
 
-    Total_time::Int = 400*yr2sec     # Set the total time for simulation here
+    Total_time::Int = 100*yr2sec     # Set the total time for simulation here
 
     CFL::Float64 = 0.6	#	Courant stability number
 
@@ -74,17 +74,17 @@ function setParameters(FZdepth, res)
 
     # Low velocity layer dimensions
     ThickX::Float64 = LX - ceil(FZdepth/dxe)*dxe # ~FZdepth m deep
-    ThickY::Float64 = ceil(100.0e3/dye)*dye   # ~ 0.25*2 km wide
+    ThickY::Float64 = ceil(0.0e3/dye)*dye   # ~ 0.25*2 km wide
 
     #.......................
     # EARTHQUAKE PARAMETERS
     #.......................
 
-    Vpl::Float64 = 35e-3/yr2sec	#	Plate loading
+    Vpl::Float64 = 2e-3/yr2sec	#	Plate loading
 
     fo::Vector{Float64} = repeat([0.6], FltNglob) #	Reference friction coefficient
     Vo::Vector{Float64} = repeat([1e-6], FltNglob)		#	Reference velocity 'Vo'
-    xLf::Vector{Float64} = repeat([0.008], FltNglob)    #	Dc (Lc) = 8 mm
+    xLf::Vector{Float64} = repeat([84e-6], FltNglob)    #	Dc (Lc) = 8 mm
 
     Vthres::Float64 = 0.001
     Vevne::Float64 = Vthres
@@ -100,7 +100,7 @@ function setParameters(FZdepth, res)
     #....................
     iglob::Array{Int,3}, x::Vector{Float64}, y::Vector{Float64} =
                         MeshBox!(NGLL, Nel, NelX, NelY, FltNglob, dxe, dye)
-    x = x .- LX
+    x = x .- LX/2
     nglob::Int = length(x)
 
     # The derivatives of the Lagrange Polynomials were pre-tabulated
@@ -172,7 +172,7 @@ function setParameters(FZdepth, res)
     BcLC::Vector{Float64}, iBcL::Vector{Int} = BoundaryMatrix!(NGLL, NelX, NelY, rho1, vs1, rho2, vs2, dy_deta, dx_dxi, wgll, iglob, 'L')
 
     # Right Boundary = free surface: nothing to do
-    #  BcRC, iBcR = BoundaryMatrix(P, wgll, iglob, 'R')
+    BcRC::Vector{Float64}, iBcR::Vector{Int} = BoundaryMatrix!(NGLL, NelX, NelY, rho1, vs1, rho2, vs2, dy_deta, dx_dxi, wgll, iglob, 'L')
 
     # Top Boundary
     BcTC::Vector{Float64}, iBcT::Vector{Int} = BoundaryMatrix!(NGLL, NelX, NelY, rho1, vs1, rho2, vs2, dy_deta, dx_dxi, wgll, iglob, 'T')
@@ -181,7 +181,7 @@ function setParameters(FZdepth, res)
     #  Mq = M[:]
     M[iBcL] .= M[iBcL] .+ half_dt*BcLC
     M[iBcT] .= M[iBcT] .+ half_dt*BcTC
-    #  M[iBcR] .= M[iBcR] .+ half_dt*BcRC
+    M[iBcR] .= M[iBcR] .+ half_dt*BcRC
 
 
     # Dynamic fault at bottom boundary
@@ -220,8 +220,12 @@ function setParameters(FZdepth, res)
 
     # Fault boundary: indices where fault within 24 km
     fbc = reshape(iglob[:,1,:], length(iglob[:,1,:]))
-    idx = findall(fbc .== findall(x .== -24e3)[1] - 1)[1]
-    FltIglobBC::Vector{Int} = fbc[1:idx]
+    # return fbc, x, iglob
+    # idx = findall(fbc .== findall(x .== -24e3)[1] - 1)[1]
+    # FltIglobBC::Vector{Int} = fbc[1:idx]
+    
+    x2::Vector{Float64} = x[fbc]
+    FltIglobBC::Vector{Int} = findall(-LX/2 .<= x2 .<= LX/2)
 
     # Display important parameters
     println("Total number of nodes on fault: ", FltNglob)
