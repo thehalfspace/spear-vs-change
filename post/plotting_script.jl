@@ -189,7 +189,7 @@ end
 
 # Cumulative sliprate plot
 function eqCyclePlot(sliprate, FltX)
-    indx = findall(abs.(FltX) .<= 16)[1]
+    indx = findall(abs.(FltX) .<= 19)[1]
     value = sliprate[indx:end,:]
     
     depth = FltX[indx:end]
@@ -198,16 +198,16 @@ function eqCyclePlot(sliprate, FltX)
     fig = PyPlot.figure(figsize=(7.2, 4.45))
     ax = fig.add_subplot(111)
     
-    c = ax.imshow(value, cmap="inferno", aspect="auto",
-                  norm=matplotlib.colors.LogNorm(vmin=1e-9, vmax=1e0),
-                  interpolation="bicubic",
-                  extent=[0,length(sliprate[1,:]), 0,16])
+    c = ax.imshow(value, cmap="viridis", aspect="auto",
+                  norm=matplotlib.colors.LogNorm(vmin=1e-9, vmax=1e1),
+                  interpolation="nearest",
+                  extent=[0,length(sliprate[1,:]), 0,19])
     
     # for stress
-    #  c = ax.imshow(value, cmap="inferno", aspect="auto",
-                  #  vmin=22.5, vmax=40,
-                  #  interpolation="bicubic",
-                  #  extent=[0,length(seismic_slipvel[1,:]), 0,16])
+#=       c = ax.imshow(value, cmap="viridis", aspect="auto",
+                  vmin=22.5, vmax=40,
+                  interpolation="nearest",
+                  extent=[0,length(sliprate[1,:]), 0,19]) =#
     
     ax.set_xlabel("Timesteps")
     ax.set_ylabel("Depth (km)")

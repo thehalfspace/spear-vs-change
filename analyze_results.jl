@@ -5,10 +5,10 @@ include("$(@__DIR__)/post/plotting_script.jl")
 include("$(@__DIR__)/post/output_seismograms.jl")
 
 # path to save files
-global path = "$(@__DIR__)/plots/vs_damage_08/"
+global path = "$(@__DIR__)/plots/vs_damage_11/"
 mkpath(path)
 
-global out_path = "$(@__DIR__)/data/vs_damage_08/"
+global out_path = "$(@__DIR__)/data/vs_damage_11/"
 
 # Global variables
 yr2sec = 365*24*60*60
