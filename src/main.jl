@@ -364,7 +364,7 @@ function main(P)
             # --------------
             print("\n\nAlpha reduction here\n\n")
 
-            alphaa = 0.99
+#=             alphaa = 0.99
             # alphaa = 1.00
             for id in did
                 Ksparse[id] = alphaa*Korig[id]
@@ -378,7 +378,7 @@ function main(P)
             nKsparse = -Ksparse
             # multigrid
             ml = ruge_stuben(kni)
-            p = aspreconditioner(ml)
+            p = aspreconditioner(ml) =#
 
         end
         if Vfmax < 0.99*P[2].Vthres && slipstart == 1
@@ -475,7 +475,8 @@ function main(P)
         else
             isolver = 2
         end
-
+        
+        # println("Vfmax", Vfmax)
         # Write max sliprate and time
         write(Vf_time, join(hcat(t,Vfmax,Vf[end], alphaa), " "), "\n")
 

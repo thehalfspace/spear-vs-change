@@ -15,7 +15,7 @@ include("$(@__DIR__)/src/damageEvol.jl")   #    Stiffness index of damaged mediu
 
 function setParameters(FZdepth, res)
 
-    LX::Int = 45  # depth dimension of rectangular domain
+    LX::Int = 90  # depth dimension of rectangular domain
     LY::Int = 30 # off fault dimenstion of rectangular domain
 
     NelX::Int = 15*res # no. of elements in x
@@ -42,7 +42,7 @@ function setParameters(FZdepth, res)
 
     yr2sec::Int = 365*24*60*60
 
-    Total_time::Int = 100*yr2sec     # Set the total time for simulation here
+    Total_time::Int = 20*yr2sec     # Set the total time for simulation here
 
     CFL::Float64 = 0.6	#	Courant stability number
 
@@ -74,7 +74,7 @@ function setParameters(FZdepth, res)
 
     # Low velocity layer dimensions
     ThickX::Float64 = LX - ceil(FZdepth/dxe)*dxe # ~FZdepth m deep
-    ThickY::Float64 = ceil(0.0e3/dye)*dye   # ~ 0.25*2 km wide
+    ThickY::Float64 = ceil(0.0/dye)*dye   # ~ 0.25*2 km wide
 
     #.......................
     # EARTHQUAKE PARAMETERS
@@ -117,7 +117,7 @@ function setParameters(FZdepth, res)
     # y coordinate = off-fault distance (+ve)
 
 
-    x_out = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0].*(-1e3)  # x coordinate of receiver
+    x_out = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0].*(-1)  # x coordinate of receiver
     #  y_out = [66.0, 130.0, 198.0, 250.0, 330.0, 396.0]     # y coordinate of receiver
     y_out = [50.0, 100.0, 200.0, 500.0, 1000.0, 1500.0]     # y coordinate of receiver
     #  n_receiver = length(x_receiver) # number of receivers
@@ -209,8 +209,11 @@ function setParameters(FZdepth, res)
         Nel_ETA = 0
     end
 
+    iFBC::Vector{Int64} = findall(abs.(FltX) .> 22.5)
+    NFBC::Int64 = length(iFBC) + 1
+    
     # Compute XiLF used in timestep calculation
-    XiLf::Vector{Float64} = XiLfFunc!(LX, FltNglob, gamma_, xLf, muMax, cca, ccb, Seff)
+    XiLf::Vector{Float64} = XiLfFunc!(LX, FltNglob, NFBC, gamma_, xLf, muMax, cca, ccb, Seff)
 
     # Find nodes that do not belong to the fault
     FltNI::Vector{Int} = deleteat!(collect(1:nglob), iFlt)
@@ -220,13 +223,26 @@ function setParameters(FZdepth, res)
 
     # Fault boundary: indices where fault within 24 km
     fbc = reshape(iglob[:,1,:], length(iglob[:,1,:]))
-    # return fbc, x, iglob
-    # idx = findall(fbc .== findall(x .== -24e3)[1] - 1)[1]
-    # FltIglobBC::Vector{Int} = fbc[1:idx]
-    
-    x2::Vector{Float64} = x[fbc]
-    FltIglobBC::Vector{Int} = findall(-LX/2 .<= x2 .<= LX/2)
+    # for 
 
+
+    jj = 1
+    FltIglobBC2::Vector{Int} = zeros(length(iFlt))
+    for ex = 1:NelX
+        for k = 1:NGLL
+            if abs.(x[iglob[k,1,ex]]) .>= 22.5
+                FltIglobBC2[jj] = iglob[k,1,ex]
+                jj = jj + 1
+            end
+        end
+    end
+
+    FltIglobBC::Vector{Int} = FltIglobBC2[findall(FltIglobBC2 .> 0)]
+    
+    # x2::Vector{Float64} = x[fbc]
+    # return fbc, x2, iglob
+    # FltIglobBC::Vector{Int} = findall(-LX/4 .<= x2 .<= LX/4)
+    
     # Display important parameters
     println("Total number of nodes on fault: ", FltNglob)
     println("Average node spacing: ", LX/(FltNglob-1), " m")
@@ -311,7 +327,7 @@ struct params_iarray{T<:Vector{Int}}
 end
 
 # Calculate XiLf used in computing the timestep
-function XiLfFunc!(LX, FltNglob, gamma_, xLf, muMax, cca, ccb, Seff)
+function XiLfFunc!(LX, FltNglob, NFBC, gamma_, xLf, muMax, cca, ccb, Seff)
 
     hcell = LX/(FltNglob-1)
     Ximax = 0.5
@@ -321,7 +337,9 @@ function XiLfFunc!(LX, FltNglob, gamma_, xLf, muMax, cca, ccb, Seff)
     XiLf::Vector{Float64} = zeros(FltNglob)
 
     #  @inbounds for j = 1:FltNglob
-    @inbounds for j = 1:FltNglob
+    # @inbounds for j = 1:FltNglob
+    for jF = 1:FltNglob-NFBC 
+        j = jF + Int(floor(NFBC/2))
 
         # Compute time restricting parameters
         expr1 = -(cca[j] - ccb[j])/cca[j]

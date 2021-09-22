@@ -15,30 +15,27 @@ function fricDepth(FltX)
     
     # Friction with depth
     cca::Array{Float64} = repeat([0.015], FltNglob)
-    ccb::Array{Float64} = repeat([0.019], FltNglob)
+    ccb::Array{Float64} = repeat([0.010], FltNglob)
 
     a_b = cca - ccb
-    fP1 = [0.015, -12]
-    fP2 = [-0.0041, -8]
-    fP3 = [-0.0041, 8]
-    fP4 = [0.015, 12]
-    # fP5 = [0.024, 24]
+    fP1 = [0.005, -12]
+    fP2 = [-0.005, -10]
+    fP3 = [-0.005, 10]
+    fP4 = [0.005, 12]
 
-    fric_depth1 = findall(abs.(FltX) .<= abs(fP2[2]))
-    fric_depth2 = findall(abs(fP2[2]) .< abs.(FltX) .<= abs(fP3[2]))
-    fric_depth3 = findall(abs(fP3[2]) .< abs.(FltX) .<= abs(fP4[2]))
-    # fric_depth4 = findall(abs(fP4[2]) .< abs.(FltX) .<= abs(fP5[2]))
-    fric_depth4 = findall(abs.(FltX) .> abs(fP4[2]))
+    fric_depth1 = findall((FltX) .<= (fP1[2]))
+    fric_depth2 = findall((fP1[2]) .< (FltX) .<= (fP2[2]))
+    fric_depth3 = findall((fP2[2]) .< (FltX) .<= (fP3[2]))
+    fric_depth4 = findall((fP3[2]) .< (FltX) .<= (fP4[2]))
+    fric_depth5 = findall((FltX) .> (fP4[2]))
 
-    a_b[fric_depth1] .= Int1D(fP1, fP2, FltX[fric_depth1])
-    a_b[fric_depth2] .= Int1D(fP2, fP3, FltX[fric_depth2])
-    a_b[fric_depth3] .= Int1D(fP3, fP4, FltX[fric_depth3])
-    # a_b[fric_depth4] .= Int1D(fP4, fP5, FltX[fric_depth4])
-    a_b[fric_depth4] .= 0.0015
-
-    #  cca[fric_depth4] .= Int1D(fP4, fP5, FltX[fric_depth4]) .+ 0.0001
-    cca .= ccb .+ a_b
-    #  ccb .= cca .- a_b
+    a_b[fric_depth1] .= 0.005 
+    a_b[fric_depth2] .= Int1D(fP1, fP2, FltX[fric_depth2])
+    a_b[fric_depth3] .= -0.005 
+    a_b[fric_depth4] .= Int1D(fP3, fP4, FltX[fric_depth4])
+    a_b[fric_depth5] .= 0.005
+    
+    ccb .= cca .- a_b
 
     return cca, ccb
 end
@@ -50,7 +47,7 @@ function SeffDepth(FltX)
 
     FltNglob = length(FltX)
 
-    Seff::Array{Float64} = repeat([50e6], FltNglob)
+    Seff::Array{Float64} = repeat([10e6], FltNglob)
     # sP1 = [10e6 0]
     # sP2 = [50e6 -2e3]
     # Seff_depth = findall(abs.(FltX) .<= abs(sP2[2]))
@@ -107,25 +104,25 @@ function tauDepth(FltX)
 
     FltNglob = length(FltX)
 
-    tauo::Array{Float64} = repeat([22.5e6], FltNglob)
-    tP1 = [22e6 -12]
-    tP2 = [30e6 -8]
+    tauo::Array{Float64} = repeat([22e6], FltNglob)
+    tP1 = [70e6 -12]
+    tP2 = [81e6 -2]
     #  tP2 = [30e6 -0.5e3]
-    tP3 = [30e6 8]
-    tP4 = [22e6 12]
-    # tP5 = [22.5e6 -24e3]
+    tP3 = [81e6 2]
+    tP4 = [70e6 12]
+    # tP5 = [22e6 -24]
 
-    tau_depth1 = findall(abs.(FltX) .<= abs(tP2[2]))
-    tau_depth2 = findall(abs(tP2[2]) .< abs.(FltX) .<= abs(tP3[2]))
-    tau_depth3 = findall(abs(tP3[2]) .< abs.(FltX) .<= abs(tP4[2]))
-    # tau_depth4 = findall(abs(tP4[2]) .< abs.(FltX) .<= abs(tP5[2]))
-    tau_depth4 = findall(abs.(FltX) .>= abs(tP4[2]))
+    tau_depth1 = findall((FltX) .<= (tP1[2]))
+    tau_depth2 = findall((tP1[2]) .< (FltX) .<= (tP2[2]))
+    tau_depth3 = findall((tP2[2]) .< (FltX) .<= (tP3[2]))
+    tau_depth4 = findall((tP3[2]) .< (FltX) .<= abs(tP4[2]))
+    tau_depth5 = findall((FltX) .>= (tP4[2]))
 
-    tauo[tau_depth1] = Int1D(tP1, tP2, FltX[tau_depth1])
-    tauo[tau_depth2] = Int1D(tP2, tP3, FltX[tau_depth2])
-    tauo[tau_depth3] = Int1D(tP3, tP4, FltX[tau_depth3])
-    tauo[tau_depth4] .= 22e6 # Int1D(tP4, tP5, FltX[tau_depth4])
-
+    tauo[tau_depth1] .= 22e6 # Int1D(tP1, tP2, FltX[tau_depth1])
+    tauo[tau_depth2] .= Int1D(tP1, tP2, FltX[tau_depth2])
+    tauo[tau_depth3] .= 30e6 # Int1D(tP3, tP4, FltX[tau_depth3])
+    tauo[tau_depth4] .= Int1D(tP3, tP4, FltX[tau_depth4])
+    tauo[tau_depth5] .= 22e6 
     # Self-similar noise in stress
     # std = self_similar_stress(FltX) 
 

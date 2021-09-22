@@ -8,8 +8,8 @@ function FBC!(IDstate, P::params_farray, NFBC, FltNglob, psi1, Vf1, tau1, psi2, 
     #  tauNR::Vector{BigFloat} = zeros(FltNglob)
     tauNR::BigFloat = 0.
 
-   for j = NFBC:FltNglob 
-
+   for jF = 1:FltNglob-NFBC 
+        j = jF + Int(floor(NFBC/2))
        tauNR = 0.
         psi1[j] = IDS!(P.xLf[j], P.Vo[j], psi[j], dt, Vf[j], 1e-5, IDstate)
 
