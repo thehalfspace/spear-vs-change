@@ -47,7 +47,7 @@ function SeffDepth(FltX)
 
     FltNglob = length(FltX)
 
-    Seff::Array{Float64} = repeat([10e6], FltNglob)
+    Seff::Array{Float64} = repeat([3e6], FltNglob)
     # sP1 = [10e6 0]
     # sP2 = [50e6 -2e3]
     # Seff_depth = findall(abs.(FltX) .<= abs(sP2[2]))
@@ -104,7 +104,7 @@ function tauDepth(FltX)
 
     FltNglob = length(FltX)
 
-    tauo::Array{Float64} = repeat([22e6], FltNglob)
+    tauo::Array{Float64} = repeat([70e6], FltNglob)
     tP1 = [70e6 -12]
     tP2 = [81e6 -2]
     #  tP2 = [30e6 -0.5e3]
@@ -118,11 +118,11 @@ function tauDepth(FltX)
     tau_depth4 = findall((tP3[2]) .< (FltX) .<= abs(tP4[2]))
     tau_depth5 = findall((FltX) .>= (tP4[2]))
 
-    tauo[tau_depth1] .= 22e6 # Int1D(tP1, tP2, FltX[tau_depth1])
+    tauo[tau_depth1] .= tP1[1] # Int1D(tP1, tP2, FltX[tau_depth1])
     tauo[tau_depth2] .= Int1D(tP1, tP2, FltX[tau_depth2])
-    tauo[tau_depth3] .= 30e6 # Int1D(tP3, tP4, FltX[tau_depth3])
+    tauo[tau_depth3] .= tP2[1] # Int1D(tP3, tP4, FltX[tau_depth3])
     tauo[tau_depth4] .= Int1D(tP3, tP4, FltX[tau_depth4])
-    tauo[tau_depth5] .= 22e6 
+    tauo[tau_depth5] .= tP4[1] 
     # Self-similar noise in stress
     # std = self_similar_stress(FltX) 
 
