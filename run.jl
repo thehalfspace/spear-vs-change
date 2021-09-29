@@ -11,16 +11,16 @@
 using Printf, LinearAlgebra, DelimitedFiles, SparseArrays,
     AlgebraicMultigrid, StaticArrays, IterativeSolvers, 
     FEMSparse, FFTW, PyCall, Statistics
-using Base.Threads
+# using Base.Threads
 #  BLAS.set_num_threads(1)
 
 include("$(@__DIR__)/par.jl")	    #	Set Parameters
 
 # Put the resolution for the simulation here: should be an integer
-resolution = 2
+resolution = 6
 
 # Output directory to save data
-out_dir = "$(@__DIR__)/data/test_02/"
+out_dir = "$(@__DIR__)/data/test_03/"
 mkpath(out_dir)
 
 P = setParameters(0e3,resolution)      # args = fault zone depth, resolution
@@ -33,6 +33,7 @@ include("$(@__DIR__)/src/otherFunctions.jl")
 
 include("$(@__DIR__)/src/main.jl")
 
+# d1, d2 = main(P)
 simulation_time = @elapsed @time main(P)
 
 println("\n")

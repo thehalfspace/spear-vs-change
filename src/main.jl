@@ -101,10 +101,10 @@ function main(P)
 
 
     # Save output variables at certain timesteps: define those timesteps
-    tvsx::Float64 = 2e-0*P[1].yr2sec  # 2 years for interseismic period
+    tvsx::Float64 = 0.5*P[1].yr2sec  # 2 years for interseismic period
     tvsxinc::Float64 = tvsx
 
-    tevneinc::Float64 = 0.1    # 0.5 second for seismic period
+    tevneinc::Float64 = 0.001    # 0.5 second for seismic period
     delfref = zeros(P[1].FltNglob)
 
     # Iterators
@@ -120,7 +120,7 @@ function main(P)
 
     v = v[:] .- 0.5*P[2].Vpl
     Vf = 2*v[P[4].iFlt]
-    iFBC::Vector{Int64} = findall(abs.(P[3].FltX) .> 22.5)
+    iFBC::Vector{Int64} = findall(abs.(P[3].FltX) .>= 22.5)
     NFBC::Int64 = length(iFBC) + 1
     Vf[iFBC] .= 0.
 
@@ -195,7 +195,9 @@ function main(P)
     delfafter = 2*d[P[4].iFlt] .+ P[2].Vpl*t 
     hypo = 0.
 
+
     while t < P[1].Total_time
+    # while it < 2
         it = it + 1
         t = t + dt
 
@@ -476,7 +478,6 @@ function main(P)
             isolver = 2
         end
         
-        # println("Vfmax", Vfmax)
         # Write max sliprate and time
         write(Vf_time, join(hcat(t,Vfmax,Vf[end], alphaa), " "), "\n")
 
@@ -498,6 +499,7 @@ function main(P)
     end
     end
 
+    # return dPre, vPre
 
 end
 

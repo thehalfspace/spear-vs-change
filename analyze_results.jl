@@ -5,28 +5,13 @@ include("$(@__DIR__)/post/plotting_script.jl")
 include("$(@__DIR__)/post/output_seismograms.jl")
 
 # path to save files
-global path = "$(@__DIR__)/plots/test_02/"
+global path = "$(@__DIR__)/plots/test_03/"
 mkpath(path)
 
-global out_path = "$(@__DIR__)/data/test_02/"
+global out_path = "$(@__DIR__)/data/test_03/"
 
 # Global variables
 yr2sec = 365*24*60*60
-
-# Read data
-event_time = readdlm(string(out_path, "event_time.out"), header=false)
-tStart = event_time[:,1]
-tEnd = event_time[:,2]
-hypo = event_time[:,3]
-
-event_stress = readdlm(string(out_path, "event_stress.out"), header=false)
-indx = Int(length(event_stress[1,:])/2)
-taubefore = event_stress[:,1:indx]
-tauafter = event_stress[:,indx+1:end]
-
-delfafter = readdlm(string(out_path, "coseismic_slip.out"), header=false)
-#  slip = readdlm(string(out_path, "slip.out"), header=false)
-sliprate = readdlm(string(out_path, "sliprate.out"), header=false)
 
 # Order of storage: Seff, tauo, FltX, cca, ccb, xLf
 params = readdlm(string(out_path, "params.out"), header=false)
@@ -57,6 +42,21 @@ mu = rho2*vs2^2
 delfsec = readdlm(string(out_path, "delfsec.out"))
 delfyr = readdlm(string(out_path, "delfyr.out"))
 stress = readdlm(string(out_path, "stress.out"), header=false)
+# Read data
+event_time = readdlm(string(out_path, "event_time.out"), header=false)
+tStart = event_time[:,1]
+tEnd = event_time[:,2]
+hypo = event_time[:,3]
+
+event_stress = readdlm(string(out_path, "event_stress.out"), header=false)
+indx = Int(length(event_stress[1,:])/2)
+taubefore = event_stress[:,1:indx]
+tauafter = event_stress[:,indx+1:end]
+
+delfafter = readdlm(string(out_path, "coseismic_slip.out"), header=false)
+#  slip = readdlm(string(out_path, "slip.out"), header=false)
+sliprate = readdlm(string(out_path, "sliprate.out"), header=false)
+
 
 start_index = get_index(stress', taubefore')
 stressdrops = taubefore .- tauafter

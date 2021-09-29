@@ -86,7 +86,7 @@ function setParameters(FZdepth, res)
     Vo::Vector{Float64} = repeat([1e-6], FltNglob)		#	Reference velocity 'Vo'
     xLf::Vector{Float64} = repeat([84e-6], FltNglob)    #	Dc (Lc) = 8 mm
 
-    Vthres::Float64 = 0.001
+    Vthres::Float64 = 0.01
     Vevne::Float64 = Vthres
 
     #-----------#
@@ -209,7 +209,7 @@ function setParameters(FZdepth, res)
         Nel_ETA = 0
     end
 
-    iFBC::Vector{Int64} = findall(abs.(FltX) .> 22.5)
+    iFBC::Vector{Int64} = findall(abs.(FltX) .>= 22.5)
     NFBC::Int64 = length(iFBC) + 1
     
     # Compute XiLF used in timestep calculation
@@ -222,7 +222,7 @@ function setParameters(FZdepth, res)
     #  diagKnew::Vector{Float64} = KdiagFunc!(FltNglob, NelY, NGLL, Nel, coefint1, coefint2, iglob, W, H, Ht, FltNI)
 
     # Fault boundary: indices where fault within 24 km
-    fbc = reshape(iglob[:,1,:], length(iglob[:,1,:]))
+    # fbc = reshape(iglob[:,1,:], length(iglob[:,1,:]))
     # for 
 
 
@@ -240,7 +240,6 @@ function setParameters(FZdepth, res)
     FltIglobBC::Vector{Int} = FltIglobBC2[findall(FltIglobBC2 .> 0)]
     
     # x2::Vector{Float64} = x[fbc]
-    # return fbc, x2, iglob
     # FltIglobBC::Vector{Int} = findall(-LX/4 .<= x2 .<= LX/4)
     
     # Display important parameters
