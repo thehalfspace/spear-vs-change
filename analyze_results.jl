@@ -5,10 +5,10 @@ include("$(@__DIR__)/post/plotting_script.jl")
 include("$(@__DIR__)/post/output_seismograms.jl")
 
 # path to save files
-global path = "$(@__DIR__)/plots/test_03/"
+global path = "$(@__DIR__)/plots/test_04/"
 mkpath(path)
 
-global out_path = "$(@__DIR__)/data/test_03/"
+global out_path = "$(@__DIR__)/data/test_04/"
 
 # Global variables
 yr2sec = 365*24*60*60
@@ -24,7 +24,7 @@ ccb = params[5,:]
 Lc = params[6,:]
 
 # Index of fault from 0 to 18 km
-flt18k = findall(FltX .<= 18)[1]
+# flt18k = findall(FltX .<= 18)[1]
 
 time_vel = readdlm(string(out_path, "time_velocity.out"), header=false)
 t = time_vel[:,1]

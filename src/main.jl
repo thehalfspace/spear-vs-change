@@ -101,10 +101,10 @@ function main(P)
 
 
     # Save output variables at certain timesteps: define those timesteps
-    tvsx::Float64 = 0.5*P[1].yr2sec  # 2 years for interseismic period
+    tvsx::Float64 = 0.001*P[1].yr2sec  # 2 years for interseismic period
     tvsxinc::Float64 = tvsx
 
-    tevneinc::Float64 = 0.001    # 0.5 second for seismic period
+    tevneinc::Float64 = 0.000001    # 0.5 second for seismic period
     delfref = zeros(P[1].FltNglob)
 
     # Iterators
@@ -120,7 +120,7 @@ function main(P)
 
     v = v[:] .- 0.5*P[2].Vpl
     Vf = 2*v[P[4].iFlt]
-    iFBC::Vector{Int64} = findall(abs.(P[3].FltX) .>= 22.5)
+    iFBC::Vector{Int64} = findall(abs.(P[3].FltX) .>= 0.05)
     NFBC::Int64 = length(iFBC) + 1
     Vf[iFBC] .= 0.
 

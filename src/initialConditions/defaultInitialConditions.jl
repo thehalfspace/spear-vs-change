@@ -110,9 +110,9 @@ function fricDepth(FltX)
     cca::Array{Float64} = repeat([0.0144], FltNglob)
     ccb::Array{Float64} = repeat([0.0191], FltNglob)
     
-    width = 6.0
-    width2 = 10.0
-    width3 = 8.0
+    width = 4.0e-2 
+    width2 = 4.0e-2
+    width3 = 3.0e-2
 
     # isel = findall(abs.(FltX) .< width/2)
     isel2 = findall(abs.(FltX) .> width2)
@@ -136,7 +136,7 @@ function tauDepth(FltX)
     tau_min = 70e6
     tau_max = 81.6e6
 
-    width1 = 6.0
+    width1 = 6.0e-2
 
     amplitude = (tau_max - tau_min)/2
 

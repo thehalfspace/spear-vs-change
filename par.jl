@@ -15,11 +15,11 @@ include("$(@__DIR__)/src/damageEvol.jl")   #    Stiffness index of damaged mediu
 
 function setParameters(FZdepth, res)
 
-    LX::Int = 90  # depth dimension of rectangular domain
-    LY::Int = 30 # off fault dimenstion of rectangular domain
+    LX::Float64 = 20e-2 #cm # depth dimension of rectangular domain
+    LY::Float64 = 20e-2 #cm # off fault dimenstion of rectangular domain
 
-    NelX::Int = 15*res # no. of elements in x
-    NelY::Int = 10*res # no. of elements in y
+    NelX::Int = 20*res # no. of elements in x
+    NelY::Int = 20*res # no. of elements in y
 
     dxe::Float64 = LX/NelX #	Size of one element along X
     dye::Float64 = LY/NelY #	Size of one element along Y
@@ -33,8 +33,8 @@ function setParameters(FZdepth, res)
     dx_dxi::Float64 = 0.5*dxe
     dy_deta::Float64 = 0.5*dye
     jac::Float64 = dx_dxi*dy_deta
-    coefint1::Float64 = jac/dx_dxi^2
-    coefint2::Float64 = jac/dy_deta^2
+    # coefint1::Float64 = jac/dx_dxi^2
+    # coefint2::Float64 = jac/dy_deta^2
 
     #..................
     # TIME PARAMETERS
@@ -42,16 +42,16 @@ function setParameters(FZdepth, res)
 
     yr2sec::Int = 365*24*60*60
 
-    Total_time::Int = 20*yr2sec     # Set the total time for simulation here
+    Total_time::Int = 0.08*yr2sec     # Set the total time for simulation here
 
     CFL::Float64 = 0.6	#	Courant stability number
 
     IDstate::Int = 2    #   State variable equation type
 
     # Some other time variables used in the loop
-    dtincf::Float64 = 1.2
+    # dtincf::Float64 = 1.2
     gamma_::Float64 = pi/4
-    dtmax::Int = 400 * 24 * 60*60		# 100 days
+    # dtmax::Int = 400 * 24 * 60*60		# 100 days
 
 
     #...................
@@ -84,9 +84,9 @@ function setParameters(FZdepth, res)
 
     fo::Vector{Float64} = repeat([0.6], FltNglob) #	Reference friction coefficient
     Vo::Vector{Float64} = repeat([1e-6], FltNglob)		#	Reference velocity 'Vo'
-    xLf::Vector{Float64} = repeat([84e-6], FltNglob)    #	Dc (Lc) = 8 mm
+    xLf::Vector{Float64} = repeat([2e-8], FltNglob)    #	Dc (Lc) = 8 mm
 
-    Vthres::Float64 = 0.01
+    Vthres::Float64 = 0.001
     Vevne::Float64 = Vthres
 
     #-----------#
@@ -209,7 +209,7 @@ function setParameters(FZdepth, res)
         Nel_ETA = 0
     end
 
-    iFBC::Vector{Int64} = findall(abs.(FltX) .>= 22.5)
+    iFBC::Vector{Int64} = findall(abs.(FltX) .>= LX/4)
     NFBC::Int64 = length(iFBC) + 1
     
     # Compute XiLF used in timestep calculation
@@ -230,7 +230,7 @@ function setParameters(FZdepth, res)
     FltIglobBC2::Vector{Int} = zeros(length(iFlt))
     for ex = 1:NelX
         for k = 1:NGLL
-            if abs.(x[iglob[k,1,ex]]) .>= 22.5
+            if abs.(x[iglob[k,1,ex]]) .>= LX/4
                 FltIglobBC2[jj] = iglob[k,1,ex]
                 jj = jj + 1
             end
