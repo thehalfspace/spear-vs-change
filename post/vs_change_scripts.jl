@@ -47,10 +47,10 @@ function Vfmax_comp(Vfmax1, Vfmax2, t1, t2, tS1, tS2, tE1, tE2)
 
     fig = PyPlot.figure(figsize=(7.2, 4.45))
     ax = fig.add_subplot(111)
-    ax.plot(t1[idS1:idE1] .- t1[idS1] .- ref, Vfmax1[idS1:idE1], lw = 2.0, color="tab:blue", 
-            label="1 km DFZ, 0% vs contrast")
+    # ax.plot(t1[idS1:idE1] .- t1[idS1] .- ref, Vfmax1[idS1:idE1], lw = 2.0, color="tab:blue", 
+    #        label="1 km DFZ, 0% vs contrast")
     ax.plot(t2[idS2:idE2] .- t2[idS2], Vfmax2[idS2:idE2], lw = 2.0, color="tab:orange", alpha = 0.6,
-            label="1 km DFZ, 30% vs contrast") 
+            label="---") 
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("Max. slip rate (m/s)")
     plt.legend()

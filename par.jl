@@ -67,14 +67,14 @@ function setParameters(FZdepth, res)
     #  vs1::Float64 = 0.6*3464
 
     rho2::Float64 = 2670
-    #  vs2::Float64 = 0.70*vs1
-    vs2::Float64 = 1.00*vs1
+    vs2::Float64 = 0.70*vs1
+    # vs2::Float64 = 0.80*vs1
 
     ETA = 0.
 
     # Low velocity layer dimensions
     ThickX::Float64 = LX - ceil(FZdepth/dxe)*dxe # ~FZdepth m deep
-    ThickY::Float64 = ceil(100.0e3/dye)*dye   # ~ 0.25*2 km wide
+    ThickY::Float64 = ceil(1.000e3/dye)*dye   # ~ 0.25*2 km wide
 
     #.......................
     # EARTHQUAKE PARAMETERS

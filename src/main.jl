@@ -114,6 +114,7 @@ function main(P)
     ntvsx::Int= 0
     nevne::Int= 0
     slipstart::Int= 0
+    slipstart2::Int= 0
     idd::Int = 0
     it_s = 0; it_e = 0
     rit = 0
@@ -359,12 +360,18 @@ function main(P)
             vhypo, indx = findmax(2*v[P[4].iFlt] .+ P[2].Vpl)
             hypo = P[3].FltX[indx]
         
+           
+
+        end
+        
+        # precursory velocity change 
+#=         if Vfmax > 1.01*0.01*P[2].Vthres && slipstart2 == 0
             #---------------
-            # Healing stuff: Ignore for now
+            # vs rigidity change
             # --------------
             print("\n\nAlpha reduction here\n\n")
 
-            alphaa = 0.99
+            alphaa = 0.98
             # alphaa = 1.00
             for id in did
                 Ksparse[id] = alphaa*Korig[id]
@@ -380,7 +387,36 @@ function main(P)
             ml = ruge_stuben(kni)
             p = aspreconditioner(ml)
 
+            slipstart2 = 1
         end
+        # precursory velocity change 
+        if Vfmax < 0.99*0.001*P[2].Vthres && slipstart2 == 1
+
+            #---------------
+            # vs rigidity change
+            # --------------
+            print("\n\nAlpha increase here\n\n")
+
+            #alphaa = 0.99
+            alphaa = 1.00
+            #for id in did
+            #    Ksparse[id] = alphaa*Korig[id]
+            #end
+            # Ksparse .= Korig
+            tStart2 = t
+            dam = alphaa
+
+            # Linear solver stuff
+            kni = -Korig[P[4].FltNI, P[4].FltNI]
+            nKsparse = -Korig
+            # multigrid
+            ml = ruge_stuben(kni)
+            p = aspreconditioner(ml)
+
+            slipstart2 = 0
+
+        end =#
+
         if Vfmax < 0.99*P[2].Vthres && slipstart == 1
             it_e = it_e + 1
             delfafter = 2*d[P[4].iFlt] .+ P[2].Vpl*t .- delfref
