@@ -7,6 +7,7 @@ using StatsBase
 using LaTeXStrings
 using PyCall
 mpl = pyimport("matplotlib")
+np = pyimport("numpy")
 
 # Default plot params
 function plot_params()
@@ -188,7 +189,7 @@ function slipPlot(delfafter2, rupture_len, FltX, Mw, tStart)
 end
 
 # Cumulative sliprate plot
-function eqCyclePlot(sliprate, FltX)
+function eqCyclePlot(sliprate, time_stress, FltX)
     indx = findall(abs.(FltX) .<= 19)[1]
     value = sliprate[indx:end,:]
     
@@ -207,9 +208,9 @@ function eqCyclePlot(sliprate, FltX)
 #=       c = ax.imshow(value, cmap="viridis", aspect="auto",
                   vmin=22.5, vmax=40,
                   interpolation="nearest",
-                  extent=[0,length(sliprate[1,:]), 0,19]) =#
+                  extent=[0,length(sliprate[1,:])/10, 0,19]) =#
     
-    ax.set_xlabel("Timesteps")
+    ax.set_xlabel("Time (s)")
     ax.set_ylabel("Depth (km)")
 
     ax.invert_yaxis()
@@ -217,10 +218,52 @@ function eqCyclePlot(sliprate, FltX)
     #   cbar.set_ticks(cbar.get_ticks()[1:2:end])
     
     show()
-    figname = string(path, "mature_sliprate_3.png")
+    figname = string(path, "mature_sliprate_2.png")
     fig.savefig(figname, dpi = 300)
     
 end
+
+function pcolPlot(sliprate, time_stress, FltX)
+    indx = findall(abs.(FltX) .<= 20)[1]
+    value = sliprate[:, indx:end]
+    
+    depth = FltX[indx:end]
+
+    X, Y = np.meshgrid(time_stress, depth) 
+
+    plot_params()
+    fig = PyPlot.figure(figsize=(9.2, 6.45))
+    ax = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+    
+#=     c = ax.imshow(value, cmap="viridis", aspect="auto",
+                  norm=matplotlib.colors.LogNorm(vmin=1e-9, vmax=1e1),
+                  interpolation="nearest",
+                  extent=[0,length(sliprate[1,:]), 0,19]) =#
+    
+    # for stress
+#=     c = ax.pcolormesh(value', cmap="viridis",
+                      norm=matplotlib.colors.LogNorm(vmin=1e-9, vmax=1e0),
+                      shading="nearest") =#
+
+    c = ax.pcolormesh(time_stress, depth, value', cmap="inferno",
+                        vmin=22.5, vmax=40,shading="nearest")
+    ax2.plot(time_stress)
+    ax2.set_ylabel("Time (days)")
+    ax2.set_xlabel("Timesteps")
+    
+    ax.set_ylabel("Depth (km)")
+
+    ax.invert_yaxis()
+    cbar = fig.colorbar(c)
+    #   cbar.set_ticks(cbar.get_ticks()[1:2:end])
+    
+    show()
+    figname = string(path, "stress_02.png")
+    fig.savefig(figname, dpi = 300)
+    
+end
+
 
 # Plot Vfmax
 function VfmaxPlot(Vfmax, t, yr2sec)
@@ -282,22 +325,32 @@ function alphaaPlot(alphaa, t, yr2sec)
 end
 
 # Compare alpha
-function alphaComp(a1, t1, a2, t2, a3, t3, yr2sec)
+function VfComp(amax, Vfmax, t, yr2sec)
     plot_params()
-    fig = PyPlot.figure(figsize=(7.2, 3.45))
+    fig = PyPlot.figure(figsize=(7.2, 4.45))
     ax = fig.add_subplot(111)
+    
+    ax.plot(t, Vfmax, lw = 2.0, label="Max. Slip rate")
+    ax.set_ylabel("Max. Slip rate (m/s)")
+    # ax.set_yscale("log")
+    # ax.set_xlim([0, 250])
+    
+    col="tab:red"
+    ax2 = ax.twinx()
+    
+    ax2.plot(t, amax, c=col, lw=2.0, label="Max. acceleration")
+    ax.set_xlabel("Time (seconds)")
+    ax2.set_ylabel("Max. acceleration (m/s2)")
+    # ax2.set_yscale("log")
+    # ax2.set_ylim([35, 60])
+    #  ax2.set_ylim([75, 100])
+    ax2.get_xaxis().set_tick_params(color=col)
+    ax2.tick_params(axis="x", labelcolor=col)
 
-    ax.plot(t1./yr2sec, a1.*100, lw = 2, label="10 yr")
-    ax.plot(t2./yr2sec, a2.*100, lw = 2, label="12 yr")
-    ax.plot(t3./yr2sec, a3.*100, lw = 2, label="15 yr")
-    ax.set_xlabel("Time (years)")
-    ax.set_ylabel("Shear Modulus Ratio (%)")
-    #  ax.set_xlim([230,400])
-    legend()
+    #  ax.legend([lab1, lab2], loc=0)
     show()
 
-
-    figname = string(path, "alpha_comp.png")
+    figname = string(path, "amax_.png")
     fig.savefig(figname, dpi = 300)
 end
 

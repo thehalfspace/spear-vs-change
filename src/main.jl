@@ -19,8 +19,8 @@ function healing2(t,tStart,dam)
                         (0.5 => 15 years to heal completely)
                         (0.8 => 8 years to heal completely)
     """
-    hmax = 0.01
-    r =  1  # 1/1.5
+    hmax = 0.02
+    r =  2  # 1/1.5
 
     hmax*(1 .- exp.(-r*(t .- tStart)/P[1].yr2sec)) .+ dam
 end
@@ -132,7 +132,7 @@ function main(P)
     Ksparse = P[5]
 
     # Intact rock stiffness
-    Korig = copy(Ksparse)   # K original
+    Korig = deepcopy(Ksparse)   # K original
 
     # Linear solver stuff
     kni = -Ksparse[P[4].FltNI, P[4].FltNI]
@@ -141,7 +141,7 @@ function main(P)
     # algebraic multigrid preconditioner
     ml = ruge_stuben(kni)
     p = aspreconditioner(ml)
-    tmp = copy(a)
+    tmp = deepcopy(a)
 
 
     # faster matrix multiplication
@@ -179,6 +179,7 @@ function main(P)
     open(string(out_dir,"event_stress.out"), "w") do event_stress
     open(string(out_dir,"coseismic_slip.out"), "w") do dfafter
     open(string(out_dir,"time_velocity.out"), "w") do Vf_time
+    open(string(out_dir,"time_stress.out"), "w") do time_stress
     open(string(out_dir, "velocity_seismogram.out"), "w") do vel_seis
 
     #....................
@@ -187,6 +188,7 @@ function main(P)
     it = 0
     t = 0.
     Vfmax = 0.
+    amax = 0.
     
     tStart2 = dt
     tStart = dt
@@ -201,6 +203,8 @@ function main(P)
         t = t + dt
 
         if isolver == 1
+            
+
 
             vPre .= v
             dPre .= d
@@ -269,25 +273,25 @@ function main(P)
             #---------------
             # Healing stuff:
             # --------------
-            #  if alphaa < 1.00 && it > 100
-                #  #  print("\n\nAlpha reduction here\n\n")
+              if alphaa < 1.00 && it > 3
+                  # print("\n\nAlpha reduction here\n\n")
 
-                #  alphaa = healing2(t, tStart2, dam)
-                #  # alphaa = 1.00
-                #  for id in did
-                    #  Ksparse[id] = alphaa*Korig[id]
-                #  end
+                  alphaa = healing2(t, tStart2, dam)
+                  # alphaa = 1.00
+                  for id in did
+                     Ksparse[id] = alphaa .* Korig[id]
+                  end
 
-                #  # Linear solver stuff
-                #  kni = -Ksparse[P[4].FltNI, P[4].FltNI]
-                #  nKsparse = -Ksparse
-                #  # multigrid
-                #  ml = ruge_stuben(kni)
-                #  p = aspreconditioner(ml)
+                  # Linear solver stuff
+                  kni = -Ksparse[P[4].FltNI, P[4].FltNI]
+                  nKsparse = -Ksparse
+                  # multigrid
+                  ml = ruge_stuben(kni)
+                  p = aspreconditioner(ml)
 
-            #  elseif alphaa > 1.00
-                    #  alphaa = 1.00
-            #  end
+              elseif alphaa > 1.00
+                      alphaa = 1.00
+              end
 
                  
         # If isolver != 1, or max slip rate is < 10^-2 m/s
@@ -344,6 +348,45 @@ function main(P)
         end # of isolver if loop
 
         Vfmax = 2*maximum(v[P[4].iFlt]) .+ P[2].Vpl
+        amax = 2*maximum(a[P[4].iFlt])
+
+
+        # Imposed Precursors
+        if amax > 0.010 && slipstart2 == 0 && t > 3.0 * P[1].yr2sec && alphaa >= 1.0 
+        # if Vfmax > 1.00*0.1*P[2].Vthres && slipstart2 == 0  && t > 3.0 *P[1].yr2sec
+                    #---------------
+            # vs rigidity change
+            # --------------
+            print("\n\nAlpha reduction here\n")
+            @printf("Time (yr) = %1.5g\n", t/P[1].yr2sec) 
+            @printf("Vfmax = %1.5g\n", Vfmax) 
+            print("it = ", it, "\n\n") 
+
+            alphaa = 0.980
+            # alphaa = 1.00
+            for id in did
+                Ksparse[id] = alphaa .* Korig[id]
+            end
+
+            tStart2 = t
+            dam = alphaa
+
+            # Linear solver stuff
+            kni = -Ksparse[P[4].FltNI, P[4].FltNI]
+            nKsparse = -Ksparse
+            # multigrid
+            ml = ruge_stuben(kni)
+            p = aspreconditioner(ml)
+
+            slipstart2 = 1
+        end
+        
+        if amax <= 0 && slipstart2 == 1
+            # For precursory velocity change
+            print("\n\nAlpha increase starts here\n\n")
+            tStart2 = t
+            slipstart2 = 0
+        end
 
         #-----
         # Output the variables before and after events
@@ -359,64 +402,8 @@ function main(P)
 
             vhypo, indx = findmax(2*v[P[4].iFlt] .+ P[2].Vpl)
             hypo = P[3].FltX[indx]
-        
-           
-
         end
         
-        # precursory velocity change 
-#=         if Vfmax > 1.01*0.01*P[2].Vthres && slipstart2 == 0
-            #---------------
-            # vs rigidity change
-            # --------------
-            print("\n\nAlpha reduction here\n\n")
-
-            alphaa = 0.98
-            # alphaa = 1.00
-            for id in did
-                Ksparse[id] = alphaa*Korig[id]
-            end
-
-            tStart2 = t
-            dam = alphaa
-
-            # Linear solver stuff
-            kni = -Ksparse[P[4].FltNI, P[4].FltNI]
-            nKsparse = -Ksparse
-            # multigrid
-            ml = ruge_stuben(kni)
-            p = aspreconditioner(ml)
-
-            slipstart2 = 1
-        end
-        # precursory velocity change 
-        if Vfmax < 0.99*0.001*P[2].Vthres && slipstart2 == 1
-
-            #---------------
-            # vs rigidity change
-            # --------------
-            print("\n\nAlpha increase here\n\n")
-
-            #alphaa = 0.99
-            alphaa = 1.00
-            #for id in did
-            #    Ksparse[id] = alphaa*Korig[id]
-            #end
-            # Ksparse .= Korig
-            tStart2 = t
-            dam = alphaa
-
-            # Linear solver stuff
-            kni = -Korig[P[4].FltNI, P[4].FltNI]
-            nKsparse = -Korig
-            # multigrid
-            ml = ruge_stuben(kni)
-            p = aspreconditioner(ml)
-
-            slipstart2 = 0
-
-        end =#
-
         if Vfmax < 0.99*P[2].Vthres && slipstart == 1
             it_e = it_e + 1
             delfafter = 2*d[P[4].iFlt] .+ P[2].Vpl*t .- delfref
@@ -432,6 +419,11 @@ function main(P)
             
             slipstart = 0
             
+            # For precursory velocity change
+#=             if slipstart2 == 1
+                tStart2 = t
+                slipstart2 = 0
+            end =#
             #---------------
             # Alpha back to normal
             # --------------
@@ -449,7 +441,6 @@ function main(P)
             #  p = aspreconditioner(ml)
         end
         
-
 
         #-----
         # Output the variables certain timesteps: 2yr interseismic, 1 sec dynamic
@@ -494,6 +485,9 @@ function main(P)
         # Output timestep info on screen
         if mod(it,500) == 0
             @printf("Time (yr) = %1.5g\n", t/P[1].yr2sec) 
+            @printf("Vfmax = %1.5g\n", Vfmax) 
+            @printf("amax = %1.5g\n", amax) 
+            print("isolver = ", isolver, "\n")
             #  println("Vfmax = ", maximum(current_sliprate))
         end
 
@@ -502,18 +496,21 @@ function main(P)
         if mod(it,10) == 0
             write(sliprate, join(2*v[P[4].iFlt] .+ P[2].Vpl, " "), "\n")
             write(stress, join((tau + P[3].tauo)./1e6, " "), "\n")
+            write(time_stress, join(t, " "), "\n")
         end
 
         # Determine quasi-static or dynamic regime based on max-slip velocity
         #  if isolver == 1 && Vfmax < 5e-3 || isolver == 2 && Vfmax < 2e-3
         if isolver == 1 && Vfmax < 5e-3 || isolver == 2 && Vfmax < 2e-3
+            
             isolver = 1
         else
             isolver = 2
+            
         end
 
         # Write max sliprate and time
-        write(Vf_time, join(hcat(t,Vfmax,Vf[end], alphaa), " "), "\n")
+        write(Vf_time, join(hcat(t,Vfmax,Vf[end], alphaa, amax, isolver), " "), "\n")
 
         # Compute next timestep dt
         dt = dtevol!(dt , dtmin, P[3].XiLf, P[1].FltNglob, NFBC, current_sliprate, isolver)
@@ -522,6 +519,7 @@ function main(P)
     end # end of time loop
 
     # close files
+    end
     end
     end
     end

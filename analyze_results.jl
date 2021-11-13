@@ -5,10 +5,10 @@ include("$(@__DIR__)/post/plotting_script.jl")
 include("$(@__DIR__)/post/output_seismograms.jl")
 
 # path to save files
-global path = "$(@__DIR__)/plots/vs_damage_004/"
+global path = "$(@__DIR__)/plots/damage_zone_precursor_06/"
 mkpath(path)
 
-global out_path = "$(@__DIR__)/data/vs_damage_004/"
+global out_path = "$(@__DIR__)/data/damage_zone_precursor_06/"
 
 # Global variables
 yr2sec = 365*24*60*60
@@ -46,6 +46,8 @@ t = time_vel[:,1]
 Vfmax = time_vel[:,2]
 Vsurface = time_vel[:,3]
 alphaa = time_vel[:,4]
+amax = time_vel[:,5]
+isolver = time_vel[:,6]
 
 
 rho1 = 2670
@@ -57,6 +59,7 @@ mu = rho2*vs2^2
 delfsec = readdlm(string(out_path, "delfsec.out"))
 delfyr = readdlm(string(out_path, "delfyr.out"))
 stress = readdlm(string(out_path, "stress.out"), header=false)
+time_stress = readdlm(string(out_path, "time_stress.out"), header=false)
 
 start_index = get_index(stress', taubefore')
 stressdrops = taubefore .- tauafter

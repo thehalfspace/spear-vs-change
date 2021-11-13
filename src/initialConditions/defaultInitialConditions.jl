@@ -18,7 +18,8 @@ function fricDepth(FltX)
     ccb::Array{Float64} = repeat([0.019], FltNglob)
 
     a_b = cca - ccb
-    fP1 = [-0.003, 0e3]
+    # fP1 = [-0.003, 0e3]
+    fP1 = [-0.0041, 0e3]
     fP2 = [-0.0041, -2e3]
     fP3 = [-0.0041, -14e3]
     fP4 = [0.015, -17e3]

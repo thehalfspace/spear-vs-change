@@ -17,10 +17,10 @@ using Base.Threads
 include("$(@__DIR__)/par.jl")	    #	Set Parameters
 
 # Put the resolution for the simulation here: should be an integer
-resolution = 6
+resolution = 12
 
 # Output directory to save data
-out_dir = "$(@__DIR__)/data/vs_damage_005/"
+out_dir = "$(@__DIR__)/data/damage_zone_precursor_06/"
 mkpath(out_dir)
 
 P = setParameters(24e3,resolution)      # args = fault zone depth, resolution
