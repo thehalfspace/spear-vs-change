@@ -19,8 +19,8 @@ function healing2(t,tStart,dam)
                         (0.5 => 15 years to heal completely)
                         (0.8 => 8 years to heal completely)
     """
-    hmax = 0.02
-    r =  2  # 1/1.5
+    hmax = 0.010
+    r =  4  # 1/1.5
 
     hmax*(1 .- exp.(-r*(t .- tStart)/P[1].yr2sec)) .+ dam
 end
@@ -352,9 +352,9 @@ function main(P)
 
 
         # Imposed Precursors
-        if amax > 0.010 && slipstart2 == 0 && t > 3.0 * P[1].yr2sec && alphaa >= 1.0 
-        # if Vfmax > 1.00*0.1*P[2].Vthres && slipstart2 == 0  && t > 3.0 *P[1].yr2sec
-                    #---------------
+        # if amax > 0.000 && slipstart2 == 0 && t > 3.0 * P[1].yr2sec && alphaa >= 1.0 
+        if Vfmax > 1.0e-6 && slipstart2 == 0 && t > 3.0 * P[1].yr2sec && alphaa >= 1.0 
+            #---------------
             # vs rigidity change
             # --------------
             print("\n\nAlpha reduction here\n")
@@ -362,7 +362,7 @@ function main(P)
             @printf("Vfmax = %1.5g\n", Vfmax) 
             print("it = ", it, "\n\n") 
 
-            alphaa = 0.980
+            alphaa = 0.990
             # alphaa = 1.00
             for id in did
                 Ksparse[id] = alphaa .* Korig[id]
@@ -381,9 +381,12 @@ function main(P)
             slipstart2 = 1
         end
         
-        if amax <= 0 && slipstart2 == 1
+        if Vfmax <= 1e-7 && amax <= 0 && slipstart2 == 1 && isolver == 1
             # For precursory velocity change
             print("\n\nAlpha increase starts here\n\n")
+            @printf("Vfmax = %1.5g\n", Vfmax)
+            @printf("amax = %1.5g\n", amax)
+            print("it = ", it, "\n\n")
             tStart2 = t
             slipstart2 = 0
         end

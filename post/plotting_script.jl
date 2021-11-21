@@ -372,7 +372,7 @@ function cumSlipPlot(delfsec, delfyr, FltX)
     ax.set_ylabel("Depth (km)")
     ax.set_ylim([0,24])
     ax.set_xlim([0,maximum(delfsec2)])
-    ax.set_xlim([0,15.0])
+    #ax.set_xlim([0,15.0])
     
     ax.invert_yaxis()
     
